@@ -1,0 +1,51 @@
+include /home/psharma/ITensor_fix/this_dir.mk
+include /home/psharma/ITensor_fix/options.mk
+
+#Define Flags ----------
+
+TENSOR_HEADERS=$(PREFIX)/itensor/all.h
+CCFLAGS= -I. $(ITENSOR_INCLUDEFLAGS) $(CPPFLAGS) $(OPTIMIZATIONS)
+CCGFLAGS= -I. $(ITENSOR_INCLUDEFLAGS) $(DEBUGFLAGS)
+LIBFLAGS=-L'$(ITENSOR_LIBDIR)' $(ITENSOR_LIBFLAGS)
+LIBGFLAGS=-L'$(ITENSOR_LIBDIR)' $(ITENSOR_LIBGFLAGS)
+
+#Rules ------------------
+
+%.o: %.cc $(ITENSOR_LIBS) $(TENSOR_HEADERS)
+        $(CCCOM) -c $(CCFLAGS) -o $@ $<
+
+.debug_objs/%.o: %.cc $(ITENSOR_GLIBS) $(TENSOR_HEADERS)
+        $(CCCOM) -c $(CCGFLAGS) -o $@ $<
+
+#Targets -----------------
+
+build: tJ_triangle
+
+debug: tJ_triangle
+
+all: tJ_triangle
+
+tJ_triangle: tJ_triangle.o $(ITENSOR_LIBS) $(TENSOR_HEADERS)
+        $(CCCOM) $(CCFLAGS) tJ_triangle.o -o tJ_triangle $(LIBFLAGS) -Wl,-rpath,$(ITENSOR_LIBDIR)
+
+tJ_triangle-g: mkdebugdir .debug_objs/tJ_triangle.o $(ITENSOR_GLIBS) $(TENSOR_HEADERS)
+        $(CCCOM) $(CCGFLAGS) .debug_objs/tJ_triangle.o -o tJ_triangle-g $(LIBGFLAGS) -Wl,-rpath,$(ITENSOR_LIBDIR)
+
+mixedspin: mixedspin.o $(ITENSOR_LIBS) $(TENSOR_HEADERS)
+        $(CCCOM) $(CCFLAGS) mixedspin.o -o mixedspin $(LIBFLAGS)
+
+mixedspin-g: mkdebugdir .debug_objs/mixedspin.o $(ITENSOR_GLIBS) $(TENSOR_HEADERS)
+        $(CCCOM) $(CCGFLAGS) .debug_objs/mixedspin.o -o mixedspin-g $(LIBGFLAGS)
+
+tJ_triangle_table: tJ_triangle_table.o $(ITENSOR_LIBS) $(TENSOR_HEADERS)
+        $(CCCOM) $(CCFLAGS) tJ_triangle_table.o -o tJ_triangle_table $(LIBFLAGS)
+
+tJ_triangle_table-g: mkdebugdir .debug_objs/tJ_triangle_table.o $(ITENSOR_GLIBS) $(TENSOR_HEADERS)
+        $(CCCOM) $(CCGFLAGS) .debug_objs/tJ_triangle_table.o -o tJ_triangle_table-g $(LIBGFLAGS)
+
+mkdebugdir:
+        mkdir -p .debug_objs
+
+clean:
+        @rm -fr *.o
+~                   
